@@ -17,6 +17,7 @@
         <module>cocomall-ware</module>
         <module>renren-fast</module>
         <module>renren-generator</module>
+        <module>cocomall-common</module>
     </modules>
 
 </project>
