@@ -23,8 +23,8 @@ mybatis-plus:
       id-type: auto
 #      logic-delete-value: 1
 #      logic-not-delete-value: 0
-#server:
-#  port: 10002
+server:
+  port: 10000
 #logging:
 #  level:
 #    com.atguigu.gulimall: debug
