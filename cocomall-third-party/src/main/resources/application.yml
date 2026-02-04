@@ -1,0 +1,17 @@
+spring:
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+    alicloud:
+      access-key: LTAI5t9cbsLmdV2N47ov4ufH
+      secret-key: ByzZq1NeTfcySDOMcEZaHT7NFyvuKk
+      oss:
+        endpoint: oss-cn-beijing.aliyuncs.com
+        bucket: cocomall-bucket
+
+  application:
+    name: cocomall-third-party
+
+server:
+  port: 30000
