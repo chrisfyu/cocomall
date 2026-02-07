@@ -2,6 +2,8 @@ package com.atguigu.cocomall.product.service.impl;
 
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -53,6 +55,27 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
     public void removeMenuByIds(List<Long> asList) {
         //TODO 1、检查当前删除的菜单，是否被别的地方引用
         baseMapper.deleteBatchIds(asList);
+    }
+
+    @Override
+    public Long[] findCatelogPath(Long catelogId) {
+        List<Long> paths = new ArrayList<>();
+        List<Long> parentPath = findParentPath(catelogId, paths);
+
+        Collections.reverse(parentPath);
+
+        return parentPath.toArray(new Long[parentPath.size()]);
+    }
+
+    private List<Long> findParentPath(Long catelogId, List<Long> paths) {
+        // Get the Id of the current node
+        paths.add(catelogId);
+        CategoryEntity categoryEntity = this.getById(catelogId);
+        if (categoryEntity.getParentCid() != 0){
+            findParentPath(categoryEntity.getParentCid(), paths);
+        }
+
+        return paths;
     }
 
     //递归查找所有菜单的子菜单
