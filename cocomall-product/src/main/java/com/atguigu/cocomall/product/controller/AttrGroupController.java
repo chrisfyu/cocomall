@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.atguigu.cocomall.product.entity.AttrEntity;
+import com.atguigu.cocomall.product.service.AttrAttrgroupRelationService;
 import com.atguigu.cocomall.product.service.AttrService;
 import com.atguigu.cocomall.product.service.CategoryService;
 import com.atguigu.cocomall.product.vo.AttrGroupRelationVo;
@@ -37,6 +38,16 @@ public class AttrGroupController {
     @Autowired
     AttrService attrService;
 
+    @Autowired
+    AttrAttrgroupRelationService relationService;
+
+    @PostMapping("/attr/relation")
+    public R addRelation(@RequestBody List<AttrGroupRelationVo> vos){
+        relationService.saveBatch(vos);
+        return R.ok();
+
+    }
+
     @GetMapping("/{attrgroupId}/attr/relation")
     public R attrRelation(@PathVariable("attrgroupId") Long attrgroupId){
         List<AttrEntity> entities = attrService.getRelationAttr(attrgroupId);
@@ -48,6 +59,17 @@ public class AttrGroupController {
     public R deleteRelation(@RequestBody AttrGroupRelationVo[] vos){
         attrService.deleteRelation(vos);
         return R.ok();
+    }
+
+    @GetMapping(value = "/{attrgroupId}/noattr/relation")
+    public R attrNoRelation(@RequestParam Map<String, Object> params,
+                                @PathVariable("attrgroupId") Long attrgroupId) {
+
+        // List<AttrEntity> entities = attrService.getRelationAttr(attrgroupId);
+
+        PageUtils page = attrService.getNoRelationAttr(params,attrgroupId);
+
+        return R.ok().put("page",page);
     }
 
     /**
