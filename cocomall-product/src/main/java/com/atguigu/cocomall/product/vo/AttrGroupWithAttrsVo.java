@@ -1,15 +1,14 @@
-package com.xunqi.gulimall.product.vo;
+package com.atguigu.cocomall.product.vo;
 
-import com.xunqi.gulimall.product.entity.AttrEntity;
+import com.atguigu.cocomall.product.entity.AttrEntity;
 import lombok.Data;
 
 import java.util.List;
 
 /**
  * @Description:
- * @Created: with IntelliJ IDEA.
- * @author: 夏沫止水
- * @createTime: 2020-05-31 10:07
+ * @Author: Fei Yu
+ * @CreateTime: 2026/2/10 13:10
  **/
 
 @Data
