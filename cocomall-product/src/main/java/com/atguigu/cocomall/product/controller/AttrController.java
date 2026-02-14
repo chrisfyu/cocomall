@@ -1,8 +1,11 @@
 package com.atguigu.cocomall.product.controller;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
+import com.atguigu.cocomall.product.entity.ProductAttrValueEntity;
+import com.atguigu.cocomall.product.service.ProductAttrValueService;
 import com.atguigu.cocomall.product.vo.AttrRespVo;
 import com.atguigu.cocomall.product.vo.AttrVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +31,18 @@ public class AttrController {
     @Autowired
     private AttrService attrService;
 
+    @Autowired
+    ProductAttrValueService productAttrValueService;
+
+    // /product/attr/base/listforspu/{spuId}
+    @GetMapping("/base/listforspu/{spuId}")
+    public R baseAttrlistforspu(@PathVariable("spuId") Long spuId){
+
+        List<ProductAttrValueEntity> entities = productAttrValueService.baseAttrlistforspu(spuId);
+
+        return R.ok().put("data",entities);
+    }
+
     /**
      * 查询规格参数信息
      * @param params
@@ -35,7 +50,6 @@ public class AttrController {
      * @param type
      * @return
      */
-
     //product/attr/sale/list/0?
     ///product/attr/base/list/{catelogId}
     @GetMapping("/{attrType}/list/{catelogId}")
@@ -89,6 +103,16 @@ public class AttrController {
     //@RequiresPermissions("product:attr:update")
     public R update(@RequestBody AttrVo attr){
 		attrService.updateAttr(attr);
+
+        return R.ok();
+    }
+
+    ///product/attr/update/{spuId}
+    @PostMapping("/update/{spuId}")
+    public R updateSpuAttr(@PathVariable("spuId") Long spuId,
+                           @RequestBody List<ProductAttrValueEntity> entities){
+
+        productAttrValueService.updateSpuAttr(spuId,entities);
 
         return R.ok();
     }

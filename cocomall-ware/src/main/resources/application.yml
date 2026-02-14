@@ -13,6 +13,7 @@ spring:
     name: cocomall-ware
 
   jackson:
+#    time-zone: Asia/Tokyo
     date-format: yyyy-MM-dd HH:mm:ss
 
 mybatis-plus:
