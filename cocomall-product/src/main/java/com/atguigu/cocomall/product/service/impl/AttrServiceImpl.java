@@ -158,6 +158,7 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         return respVo;
     }
 
+    @Transactional
     @Override
     public void updateAttr(AttrVo attrVo) {
 

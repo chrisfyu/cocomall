@@ -51,9 +51,9 @@ public class PurchaseDetailServiceImpl extends ServiceImpl<PurchaseDetailDao, Pu
 
     @Override
     public List<PurchaseDetailEntity> listDetailByPurchaseId(Long id) {
-        List<PurchaseDetailEntity> purchase_id = this.list(new QueryWrapper<PurchaseDetailEntity>().eq("purchase_id", id));
+        List<PurchaseDetailEntity> purchaseId = this.list(new QueryWrapper<PurchaseDetailEntity>().eq("purchase_id", id));
 
-        return purchase_id;
+        return purchaseId;
     }
 
 }
