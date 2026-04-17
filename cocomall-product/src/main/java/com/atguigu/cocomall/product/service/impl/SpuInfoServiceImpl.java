@@ -4,6 +4,7 @@ import com.atguigu.cocomall.product.entity.*;
 import com.atguigu.cocomall.product.feign.CouponFeignService;
 import com.atguigu.cocomall.product.service.*;
 import com.atguigu.cocomall.product.vo.*;
+import com.atguigu.common.es.SkuEsModel;
 import com.atguigu.common.to.SkuReductionTo;
 import com.atguigu.common.to.SpuBoundTo;
 import com.atguigu.common.utils.R;
@@ -54,6 +55,12 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
 
     @Autowired
     CouponFeignService couponFeignService;
+
+    @Autowired
+    BrandService brandService;
+
+    @Autowired
+    CategoryService categoryService;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -215,6 +222,30 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
         );
 
         return new PageUtils(page);
+    }
+
+    @Override
+    public void up(Long spuId) {
+        SkuEsModel skuEsModel = new SkuEsModel();
+        List<SkuInfoEntity> skus = skuInfoService.getSkuBySpuId(spuId);
+
+        List<SkuEsModel> uoProducts = skus.stream().map(sku -> {
+            SkuEsModel esModel = new SkuEsModel();
+            BeanUtils.copyProperties(sku, esModel);
+
+            esModel.setSkuPrice(sku.getPrice());
+            esModel.setSkuImg(sku.getSkuDefaultImg());
+
+            BrandEntity brand = brandService.getById(esModel.getBrandId());
+            esModel.setBrandName(brand.getName());
+            esModel.setBrandImg(brand.getLogo());
+
+            CategoryEntity category = categoryService.getById(esModel.getCatalogId());
+            esModel.setCatalogName(category.getName());
+
+            return esModel;
+        }).collect(Collectors.toList());
+
     }
 
 }
