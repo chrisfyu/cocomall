@@ -1,4 +1,4 @@
-package com.atguigu.cocomall.product.controller;
+package com.atguigu.cocomall.product.app;
 
 import java.util.Arrays;
 import java.util.List;
@@ -11,7 +11,6 @@ import com.atguigu.cocomall.product.vo.AttrVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import com.atguigu.cocomall.product.entity.AttrEntity;
 import com.atguigu.cocomall.product.service.AttrService;
 import com.atguigu.common.utils.PageUtils;
 import com.atguigu.common.utils.R;

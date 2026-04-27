@@ -16,8 +16,8 @@ import java.util.Map;
  */
 @Slf4j
 //@ResponseBody
-//@ControllerAdvice(basePackages = "com.atguigu.cocomall.product.controller")
-@RestControllerAdvice(basePackages = "com.atguigu.cocomall.product.controller")
+//@ControllerAdvice(basePackages = "com.atguigu.cocomall.product.app")
+@RestControllerAdvice(basePackages = "com.atguigu.cocomall.product.app")
 public class CocomallExceptionControllerAdvice {
 
 

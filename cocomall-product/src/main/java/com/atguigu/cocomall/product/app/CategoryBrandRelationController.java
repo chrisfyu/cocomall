@@ -1,4 +1,4 @@
-package com.atguigu.cocomall.product.controller;
+package com.atguigu.cocomall.product.app;
 
 import java.util.Arrays;
 import java.util.List;
