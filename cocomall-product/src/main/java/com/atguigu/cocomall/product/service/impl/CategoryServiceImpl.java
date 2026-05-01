@@ -1,11 +1,17 @@
 package com.atguigu.cocomall.product.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.atguigu.cocomall.product.service.CategoryBrandRelationService;
 import com.atguigu.cocomall.product.vo.Catelog2Vo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -18,6 +24,7 @@ import com.atguigu.cocomall.product.dao.CategoryDao;
 import com.atguigu.cocomall.product.entity.CategoryEntity;
 import com.atguigu.cocomall.product.service.CategoryService;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 
 @Service("categoryService")
@@ -27,6 +34,9 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 
     @Autowired
     CategoryBrandRelationService categoryBrandRelationService;
+
+    @Autowired
+    StringRedisTemplate redisTemplate;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -46,7 +56,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         //2、组装成父子的树形结构
         //2.1）、找到所有的一级分类
         List<CategoryEntity> level1Menus = entities.stream().filter(categoryEntity ->
-            categoryEntity.getParentCid() == 0
+                categoryEntity.getParentCid() == 0
         ).map(menu -> {
             menu.setChildren(getChildrens(menu, entities));
             return menu;
@@ -75,13 +85,14 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 
     /**
      * 级联更新所有关联的数据
+     *
      * @param category
      */
     @Transactional
     @Override
     public void updateCascade(CategoryEntity category) {
         this.updateById(category);
-        categoryBrandRelationService.updateCategory(category.getCatId(),category.getName());
+        categoryBrandRelationService.updateCategory(category.getCatId(), category.getName());
     }
 
     @Override
@@ -93,11 +104,66 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
     @Override
     public Map<String, List<Catelog2Vo>> getCatalogJson() {
 
-//        Map<String, List<Catelog2Vo>> catalogJson = (Map<String, List<Catelog2Vo>>) cache.get("catalogJson");
-////        if (cache.get("catalogJson") == null) {
-////            cache.put("catalogJson", catalogJson);
-////        }
-////        return catalogJson;
+        //1、加入缓存逻辑,缓存中存的数据是json字符串
+        //JSON跨语言。跨平台兼容。
+        String catalogJSON = redisTemplate.opsForValue().get("catalogJSON");
+        if (StringUtils.isEmpty(catalogJSON)) {
+            System.out.println("缓存不命中...查询数据库...");
+            Map<String, List<Catelog2Vo>> catalogJsonFromDb = getCatalogJsonFromDbWithRedisLock();
+
+            return catalogJsonFromDb;
+        }
+
+        System.out.println("缓存命中...直接返回...");
+        Map<String, List<Catelog2Vo>> result = JSON.parseObject(catalogJSON, new TypeReference<Map<String, List<Catelog2Vo>>>() {
+        });
+        return result;
+
+    }
+
+    public Map<String, List<Catelog2Vo>> getCatalogJsonFromDbWithRedisLock() {
+
+        String uuid = UUID.randomUUID().toString();
+        Boolean lock = redisTemplate.opsForValue().setIfAbsent("lock", uuid, 300, TimeUnit.SECONDS);
+        if (lock) {
+            System.out.println("获取分布式锁成功...");
+            // 加锁成功。。。执行任务
+            // 2.设置过期时间，必须和加锁是同步的，原子的。
+//            redisTemplate.expire("lock", 30, TimeUnit.SECONDS);
+            Map<String, List<Catelog2Vo>> dataFromDb;
+            try {
+                dataFromDb = getDataFromDb();
+            } finally {
+                String script = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
+                Long lock1 = redisTemplate.execute(new DefaultRedisScript<Long>(script, Long.class)
+                        , Arrays.asList("lock"), uuid);
+
+            }
+//            String lockValue = redisTemplate.opsForValue().get("lock");
+//            if (uuid.equals(lockValue)) {
+//                redisTemplate.delete("lock");
+//            }
+
+            return dataFromDb;
+        } else {
+            System.out.println("获取分布式锁失败...等待重试...");
+            try {
+                TimeUnit.MILLISECONDS.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return getCatalogJsonFromDbWithRedisLock();
+        }
+    }
+
+    private Map<String, List<Catelog2Vo>> getDataFromDb() {
+        String catalogJSON = redisTemplate.opsForValue().get("catalogJSON");
+        if (!StringUtils.isEmpty(catalogJSON)) {
+            Map<String, List<Catelog2Vo>> result = JSON.parseObject(catalogJSON, new TypeReference<Map<String, List<Catelog2Vo>>>() {
+            });
+            return result;
+        }
+        System.out.println("查询了数据库...");
 
         List<CategoryEntity> selectList = baseMapper.selectList(null);
         //1、查出所有一级分类
@@ -131,7 +197,23 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
             return catelog2Vos;
         }));
 
+        String s = JSON.toJSONString(parent_cid);
+        redisTemplate.opsForValue().set("catalogJSON", s);
         return parent_cid;
+    }
+
+    // 从数据库查询并封装数据
+    public Map<String, List<Catelog2Vo>> getCatalogJsonFromDbWithLocalLock() {
+
+//        Map<String, List<Catelog2Vo>> catalogJson = (Map<String, List<Catelog2Vo>>) cache.get("catalogJson");
+////        if (cache.get("catalogJson") == null) {
+////            cache.put("catalogJson", catalogJson);
+////        }
+////        return catalogJson;
+        synchronized (this) {
+            return getDataFromDb();
+        }
+
     }
 
     private List<CategoryEntity> getParent_cid(List<CategoryEntity> selectList, Long parent_cid) {
@@ -143,7 +225,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         // Get the Id of the current node
         paths.add(catelogId);
         CategoryEntity categoryEntity = this.getById(catelogId);
-        if (categoryEntity.getParentCid() != 0){
+        if (categoryEntity.getParentCid() != 0) {
             findParentPath(categoryEntity.getParentCid(), paths);
         }
 
@@ -151,7 +233,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
     }
 
     //递归查找所有菜单的子菜单
-    private List<CategoryEntity> getChildrens(CategoryEntity root, List<CategoryEntity> all){
+    private List<CategoryEntity> getChildrens(CategoryEntity root, List<CategoryEntity> all) {
 
         List<CategoryEntity> children = all.stream().filter(categoryEntity -> {
             return categoryEntity.getParentCid() == root.getCatId();
