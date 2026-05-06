@@ -110,7 +110,9 @@ public class MallSearchServiceImpl implements MallSearchService {
         }
 
         //1.2.4 hasStock
-        boolQuery.filter(QueryBuilders.termQuery("hasStock", param.getHasStock() == 1));
+        if (param.getHasStock() != null) {
+            boolQuery.filter(QueryBuilders.termQuery("hasStock", param.getHasStock() == 1));
+        }
 
         //1.2.5 skuPrice
         if (!StringUtils.isEmpty(param.getSkuPrice())) {
@@ -290,7 +292,14 @@ public class MallSearchServiceImpl implements MallSearchService {
 
         int totalPages = (int)total % EsConstant.PRODUCT_PAGESIZE == 0? (int)total / EsConstant.PRODUCT_PAGESIZE : ((int)total / EsConstant.PRODUCT_PAGESIZE + 1);
         result.setTotalPages(totalPages);
-        //        result.setProducts();
+
+        List<Integer> pageNavs = new ArrayList<>();
+        for (int i = 1; i <= totalPages; i++) {
+            pageNavs.add(i);
+        }
+        result.setPageNavs(pageNavs);
+
+
         return result;
     }
 }
