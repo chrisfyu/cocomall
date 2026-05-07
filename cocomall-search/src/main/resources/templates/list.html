@@ -762,6 +762,10 @@
                 <a href="/static/search/#">游戏手机</a>
             </div>
         </div>
+        <div class="JD_ipone_one c">
+            <!-- 遍历面包屑功能 -->
+            <a th:href="${nav.link}" th:each="nav:${result.navs}"><span th:text="${nav.navName}"></span>：<span th:text="${nav.navValue}"></span> x</a>
+        </div>
         <i><img src="/static/search/image/right-@1x.png" alt=""></i>
     </div>
 </div>
@@ -775,9 +779,9 @@
                 <h3><b>手机</b><em>商品筛选</em></h3>
                 <div class="st-ext">共&nbsp;<span>10135</span>个商品 </div>
             </div>
-            <div class="JD_nav_logo">
+            <div class="JD_nav_logo" th:with="brandid=${param.brandId}" >
                 <!--品牌-->
-                <div class="JD_nav_wrap">
+                <div th:if="${#strings.isEmpty(brandid)}" class="JD_nav_wrap">
                     <div class="sl_key">
                         <span><b>品牌：</b></span>
                     </div>
@@ -835,8 +839,8 @@
                         </a>
                     </div>
                 </div>
-                <!--屏幕尺寸-->
-                <div class="JD_pre" th:each="attr:${result.attrs}">
+                <!--其它的所有需要展示的属性-->
+                <div class="JD_pre" th:each="attr:${result.attrs}" th:if="${!#lists.contains(result.attrIds, attr.attrId)}">
                     <div class="sl_key">
                         <span th:text="${attr.attrName}">屏幕尺寸：</span>
                     </div>
@@ -1026,7 +1030,7 @@
                 <div class="filter">
                     <!--综合排序-->
                     <div class="filter_top">
-                        <div class="filter_top_left" th:with="p = ${param.sort}">
+                        <div class="filter_top_left" th:with="p = ${param.sort}, priceRange = ${param.skuPrice}">
                             <a sort="hotScore"
                                th:class="${(!#strings.isEmpty(p) && #strings.startsWith(p,'hotScore') && #strings.endsWith(p,'desc')) ? 'sort_a desc' : 'sort_a'}"
                                th:attr="style=${(#strings.isEmpty(p) || #strings.startsWith(p,'hotScore')) ?
@@ -1047,6 +1051,14 @@
                                 #strings.endsWith(p,'desc'))?'↓':'↑' }]]</a>
                             <a href="/static/search/#">评论分</a>
                             <a href="/static/search/#">上架时间</a>
+                            <input id="skuPriceFrom" type="number"
+                                   th:value="${#strings.isEmpty(priceRange)?'':#strings.substringBefore(priceRange,'_')}"
+                                   style="width: 100px; margin-left: 30px">
+                            -
+                            <input id="skuPriceTo" type="number"
+                                   th:value="${#strings.isEmpty(priceRange)?'':#strings.substringAfter(priceRange,'_')}"
+                                   style="width: 100px">
+                            <button id="skuPriceSearchBtn">确定</button>
                         </div>
                         <div class="filter_top_right">
                             <span class="fp-text">
@@ -1154,8 +1166,8 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="/static/search/#">
-                                        <i></i>
+                                    <a th:with="check = ${param.hasStock}">
+                                        <input id="showHasStock" type="checkbox" th:checked="${#strings.equals(check,'1')}">
                                         仅显示有货
                                     </a>
                                 </li>
@@ -1981,12 +1993,7 @@
     
     function searchProducts(name, value) {
         //原来的页面
-        var href = location.href + "";
-        if (href.indexOf("?") != -1) {
-            location.href = location.href + "&" + name + "=" + value;
-        } else {
-            location.href = location.href + "?" + name + "=" + value;
-        }
+        location.href = replaceAndAddParamVal(location.href,name,value, true)
     }
 
     function searchByKeyword() {
@@ -2006,12 +2013,22 @@
         return false;
     });
 
-    function replaceAndAddParamVal(url, paramName, replaceVal) {
+    function replaceAndAddParamVal(url, paramName, replaceVal, forceAdd) {
         var oUrl = url.toString();
         if (oUrl.indexOf(paramName) != -1) {
-            var re = eval('/(' + paramName + '=)([^&]*)/gi');
-            var nUrl = oUrl.replace(re, paramName + '=' + replaceVal);
-            return nUrl;
+            if (forceAdd){
+                var nUrl = "";
+                if (oUrl.indexOf("?") != -1) {
+                    nUrl = oUrl + "&" + paramName + "=" + replaceVal;
+                } else {
+                    nUrl = oUrl + "?" + paramName + "=" + replaceVal;
+                }
+                return nUrl;
+            } else {
+                var re = eval('/(' + paramName + '=)([^&]*)/gi');
+                var nUrl = oUrl.replace(re, paramName + '=' + replaceVal);
+                return nUrl;
+            }
         } else {
             var nUrl = "";
             if (oUrl.indexOf("?") != -1) {
@@ -2021,7 +2038,7 @@
             }
             return nUrl;
         }
-    };
+    }
 
     $(".sort_a").click(function () {
         // changeStyle(this);
@@ -2056,7 +2073,26 @@
             text = text + "↑";
             $(ele).text(text);
         }
-    };
+    }
+
+    $("#skuPriceSearchBtn").click(function () {
+        let from = $("#skuPriceFrom").val();
+        let to = $("#skuPriceTo").val();
+
+        let query = from + "_" + to;
+        location.href = replaceAndAddParamVal(location.href, "skuPrice", query);
+    });
+    
+    $("#showHasStock").change(function () {
+        if($(this).prop("checked")) {
+            location.href = replaceAndAddParamVal(location.href,"hasStock",1);
+        } else {
+            let re = eval('/(hasStock=)([^&]*)/gi');
+            location.href = (location.href+"").replace(re,"");
+        }
+        return false;
+    });
+
 </script>
 </body>
 </html>

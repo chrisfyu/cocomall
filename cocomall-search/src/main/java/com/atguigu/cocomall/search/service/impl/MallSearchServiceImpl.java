@@ -1,12 +1,17 @@
 package com.atguigu.cocomall.search.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import com.atguigu.cocomall.search.config.CocomallElasticSearchConfig;
 import com.atguigu.cocomall.search.constant.EsConstant;
+import com.atguigu.cocomall.search.feign.ProductFeignService;
 import com.atguigu.cocomall.search.service.MallSearchService;
+import com.atguigu.cocomall.search.vo.AttrResponseVo;
+import com.atguigu.cocomall.search.vo.BrandVo;
 import com.atguigu.cocomall.search.vo.SearchParam;
 import com.atguigu.cocomall.search.vo.SearchResult;
 import com.atguigu.common.es.SkuEsModel;
+import com.atguigu.common.utils.R;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
@@ -33,6 +38,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,7 +54,10 @@ import java.util.stream.Collectors;
 public class MallSearchServiceImpl implements MallSearchService {
 
     @Autowired
-    RestHighLevelClient client;
+    private RestHighLevelClient client;
+
+    @Autowired
+    ProductFeignService productFeignService;
 
     @Override
     public SearchResult search(SearchParam param) {
@@ -299,7 +309,68 @@ public class MallSearchServiceImpl implements MallSearchService {
         }
         result.setPageNavs(pageNavs);
 
+        //6、构建面包屑导航
+        if (param.getAttrs() != null && param.getAttrs().size() > 0) {
+            List<SearchResult.NavVo> collect = param.getAttrs().stream().map(attr -> {
+                SearchResult.NavVo navVo = new SearchResult.NavVo();
+
+                String[] s = attr.split("_");
+                navVo.setNavValue(s[1]);
+                R r = productFeignService.attrInfo(Long.parseLong(s[0]));
+                result.getAttrIds().add(Long.parseLong(s[0]));
+                if (r.getCode() == 0) {
+                    AttrResponseVo data = r.getData("attr", new TypeReference<AttrResponseVo>() {
+                    });
+                    navVo.setNavName(data.getAttrName());
+                } else {
+                    navVo.setNavName(s[0]);
+                }
+
+                String replace = replaceQueryString(param, attr, "attrs");
+                navVo.setLink("http://search.cocomall.com/list.html?" + replace);
+
+                return navVo;
+            }).collect(Collectors.toList());
+
+            result.setNavs(collect);
+        }
+
+        //品牌，分类
+        if (param.getBrandId() != null && param.getBrandId().size() > 0){
+            List<SearchResult.NavVo> navs = result.getNavs();
+            SearchResult.NavVo navVo = new SearchResult.NavVo();
+
+            navVo.setNavName("品牌");
+
+            R r = productFeignService.brandsInfo(param.getBrandId());
+            if (r.getCode() == 0) {
+                List<BrandVo> brand = r.getData("brand", new TypeReference<List<BrandVo>>() {
+                });
+                StringBuffer buffer = new StringBuffer();
+                String replace ="";
+                for (BrandVo brandVo : brand) {
+                    buffer.append(brandVo.getBrandName() + ";");
+                    replace = replaceQueryString(param, brandVo.getBrandId() + "", "brandId");
+                }
+                navVo.setNavValue(buffer.toString());
+                navVo.setLink("http://search.cocomall.com/list.html?" + replace);
+            }
+
+            navs.add(navVo);
+        }
 
         return result;
+    }
+
+    private String replaceQueryString(SearchParam param, String value, String key) {
+        String encode = null;
+        try {
+            encode = URLEncoder.encode(value, "UTF-8");
+            encode.replace("+","%20");  //浏览器对空格的编码和Java不一样，差异化处理
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        return param.get_queryString().replace("&" + key + "=" + encode, "");
     }
 }
