@@ -1,8 +1,11 @@
 package com.atguigu.cocomall.product;
 
+import com.atguigu.cocomall.product.dao.AttrGroupDao;
 import com.atguigu.cocomall.product.entity.BrandEntity;
 import com.atguigu.cocomall.product.service.BrandService;
 import com.atguigu.cocomall.product.service.CategoryService;
+import com.atguigu.cocomall.product.vo.SkuItemVo;
+import com.atguigu.cocomall.product.vo.SpuItemAttrGroupVo;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.additional.query.impl.QueryChainWrapper;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +38,15 @@ public class CocomallProductApplicationTests {
 
     @Autowired
     RedissonClient redissonClient;
+
+    @Autowired
+    AttrGroupDao attrGroupDao;
+
+    @Test
+    public void test() {
+        List<SpuItemAttrGroupVo> attrGroupWithAttrsBySpuId = attrGroupDao.getAttrGroupWithAttrsBySpuId(1L, 225L);
+        System.out.println(attrGroupWithAttrsBySpuId);
+    }
 
     @Test
     public void redisson() {

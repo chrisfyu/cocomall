@@ -1,5 +1,6 @@
 package com.atguigu.cocomall.product.service;
 
+import com.atguigu.cocomall.product.vo.SkuItemVo;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.atguigu.common.utils.PageUtils;
 import com.atguigu.cocomall.product.entity.SkuInfoEntity;
@@ -23,5 +24,7 @@ public interface SkuInfoService extends IService<SkuInfoEntity> {
     PageUtils queryPageByCondition(Map<String, Object> params);
 
     List<SkuInfoEntity> getSkuBySpuId(Long spuId);
+
+    SkuItemVo item(Long skuId);
 }
 

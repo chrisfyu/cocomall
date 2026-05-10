@@ -1,0 +1,29 @@
+package com.atguigu.cocomall.product.web;
+
+import com.atguigu.cocomall.product.service.SkuInfoService;
+import com.atguigu.cocomall.product.vo.SkuItemVo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
+/**
+ * @Description:
+ * @Author: Fei Yu
+ * @CreateTime: 2026/5/8 22:53
+ */
+
+@Controller
+public class ItemController {
+
+    @Autowired
+    SkuInfoService skuInfoService;
+
+    @GetMapping("/{skuId}.html")
+    public String skuItem(@PathVariable("skuId") Long skuId){
+        System.out.println("准备查询" + skuId + "详情");
+        SkuItemVo vo = skuInfoService.item(skuId);
+
+        return "item";
+    }
+}

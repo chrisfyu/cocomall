@@ -1,6 +1,8 @@
 package com.atguigu.cocomall.product.service;
 
 import com.atguigu.cocomall.product.vo.AttrGroupWithAttrsVo;
+import com.atguigu.cocomall.product.vo.SkuItemVo;
+import com.atguigu.cocomall.product.vo.SpuItemAttrGroupVo;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.atguigu.common.utils.PageUtils;
 import com.atguigu.cocomall.product.entity.AttrGroupEntity;
@@ -22,5 +24,7 @@ public interface AttrGroupService extends IService<AttrGroupEntity> {
     PageUtils queryPage(Map<String, Object> params, Long catelogId);
 
     List<AttrGroupWithAttrsVo> getAttrGroupWithAttrsByCatelogId(Long catelogId);
+
+    List<SpuItemAttrGroupVo> getAttrGroupWithAttrsBySpuId(Long spuId, Long catalogId);
 }
 

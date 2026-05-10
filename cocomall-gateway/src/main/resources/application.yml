@@ -57,7 +57,7 @@ spring:
         - id: cocomall_host_route
           uri: lb://cocomall-product
           predicates:
-            - Host=cocomall.com
+            - Host=cocomall.com,item.cocomall.com
 
         - id: cocomall_search_route
           uri: lb://cocomall-search
