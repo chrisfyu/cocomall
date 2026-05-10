@@ -1,9 +1,11 @@
 package com.atguigu.cocomall.product;
 
 import com.atguigu.cocomall.product.dao.AttrGroupDao;
+import com.atguigu.cocomall.product.dao.SkuSaleAttrValueDao;
 import com.atguigu.cocomall.product.entity.BrandEntity;
 import com.atguigu.cocomall.product.service.BrandService;
 import com.atguigu.cocomall.product.service.CategoryService;
+import com.atguigu.cocomall.product.vo.SkuItemSaleAttrVo;
 import com.atguigu.cocomall.product.vo.SkuItemVo;
 import com.atguigu.cocomall.product.vo.SpuItemAttrGroupVo;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -42,10 +44,16 @@ public class CocomallProductApplicationTests {
     @Autowired
     AttrGroupDao attrGroupDao;
 
+    @Autowired
+    SkuSaleAttrValueDao skuSaleAttrValueDao;
+
     @Test
     public void test() {
-        List<SpuItemAttrGroupVo> attrGroupWithAttrsBySpuId = attrGroupDao.getAttrGroupWithAttrsBySpuId(1L, 225L);
-        System.out.println(attrGroupWithAttrsBySpuId);
+//        List<SpuItemAttrGroupVo> attrGroupWithAttrsBySpuId = attrGroupDao.getAttrGroupWithAttrsBySpuId(1L, 225L);
+//        System.out.println(attrGroupWithAttrsBySpuId);
+
+        List<SkuItemSaleAttrVo> saleAttrsBySpuId = skuSaleAttrValueDao.getSaleAttrsBySpuId(1L);
+        System.out.println(saleAttrsBySpuId);
     }
 
     @Test

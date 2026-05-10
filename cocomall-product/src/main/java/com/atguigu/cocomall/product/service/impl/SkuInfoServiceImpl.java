@@ -2,9 +2,8 @@ package com.atguigu.cocomall.product.service.impl;
 
 import com.atguigu.cocomall.product.entity.SkuImagesEntity;
 import com.atguigu.cocomall.product.entity.SpuInfoDescEntity;
-import com.atguigu.cocomall.product.service.AttrGroupService;
-import com.atguigu.cocomall.product.service.SkuImagesService;
-import com.atguigu.cocomall.product.service.SpuInfoDescService;
+import com.atguigu.cocomall.product.service.*;
+import com.atguigu.cocomall.product.vo.SkuItemSaleAttrVo;
 import com.atguigu.cocomall.product.vo.SkuItemVo;
 import com.atguigu.cocomall.product.vo.SpuItemAttrGroupVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +20,6 @@ import com.atguigu.common.utils.Query;
 
 import com.atguigu.cocomall.product.dao.SkuInfoDao;
 import com.atguigu.cocomall.product.entity.SkuInfoEntity;
-import com.atguigu.cocomall.product.service.SkuInfoService;
 import org.springframework.util.StringUtils;
 
 
@@ -36,6 +34,9 @@ public class SkuInfoServiceImpl extends ServiceImpl<SkuInfoDao, SkuInfoEntity> i
 
     @Autowired
     AttrGroupService attrGroupService;
+
+    @Autowired
+    SkuSaleAttrValueService skuSaleAttrValueService;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -121,6 +122,10 @@ public class SkuInfoServiceImpl extends ServiceImpl<SkuInfoDao, SkuInfoEntity> i
         List<SkuImagesEntity> images = imagesService.getImagesBySkuId(skuId);
         skuItemVo.setImages(images);
 
+        //3、获取spu的销售属性组合
+        List<SkuItemSaleAttrVo> saleAttrVos = skuSaleAttrValueService.getSaleAttrsBySpuId(spuId);
+        skuItemVo.setSaleAttr(saleAttrVos);
+
         //4、获取spu的介绍    pms_spu_info_desc
         SpuInfoDescEntity spuInfoDescEntity = spuInfoDescService.getById(spuId);
         skuItemVo.setDesc(spuInfoDescEntity);
@@ -129,7 +134,7 @@ public class SkuInfoServiceImpl extends ServiceImpl<SkuInfoDao, SkuInfoEntity> i
         List<SpuItemAttrGroupVo> attrGroupVos = attrGroupService.getAttrGroupWithAttrsBySpuId(spuId, catalogId);
         skuItemVo.setGroupAttrs(attrGroupVos);
 
-        return null;
+        return skuItemVo;
     }
 
 }
