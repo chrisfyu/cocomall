@@ -63,3 +63,8 @@ spring:
           uri: lb://cocomall-search
           predicates:
             - Host=search.cocomall.com
+
+        - id: cocomall_auth_route
+          uri: lb://cocomall-auth-server
+          predicates:
+            - Host=auth.cocomall.com
