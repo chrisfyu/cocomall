@@ -5005,7 +5005,7 @@ Cookie</span>是由网页服务器存放在您的访问设备上的文本文件�
 			<div class="desc">欢迎注册</div>
 			<div class="dfg">
 				<span>已有账号？</span>
-				<a href="/static/reg/">请登录</a>
+				<a href="http://auth.cocomall.com/login.html">请登录</a>
 			</div>
 		</header>
 		<section>
@@ -5047,10 +5047,7 @@ Cookie</span>是由网页服务器存放在您的访问设备上的文本文件�
 					<label for="username" class="other_label">验 证 码
 			<input maxlength="20" type="text" placeholder="请输入验证码" class="caa">
 			</label>
-					<span id="code"></span>
-					<div class="tips">
-
-					</div>
+					<a id="sendCode"> 发送验证码 </a>
 				</div>
 				<div class="arguement">
 					<input type="checkbox" id="xieyi"> 阅读并同意
@@ -5302,6 +5299,30 @@ Cookie</span>是由网页服务器存放在您的访问设备上的文本文件�
 			$(".cuo").click(function() {
 				$(".zong").hide();
 			});
+
+			$(function(){
+				$("#sendCode").click(function(){
+					if($(this).hasClass("disabled")){
+
+					} else {
+						timeoutChangeStyle();
+					}
+				});
+			});
+			var num = 60;
+			function timeoutChangeStyle(){
+				$("#sendCode").attr("class", "disabled");
+				if(num == 0){
+					$("#sendCode").text("发送验证码");
+					num = 60
+					$("#sendCode").attr("class", "");
+				} else {
+					let str = num + "s 后再次发送";
+					$("#sendCode").text(str);
+					setTimeout("timeoutChangeStyle()", 1000);
+				}
+				num--;
+			}
 		</script>
 	</body>
 

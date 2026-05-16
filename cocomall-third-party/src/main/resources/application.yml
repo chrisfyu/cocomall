@@ -3,6 +3,13 @@ spring:
     nacos:
       discovery:
         server-addr: 127.0.0.1:8848
+    alicloud:
+      sms:
+        host: https://dfsns.market.alicloudapi.com
+        path: /data/send_sms
+        template-id: CST_ptdie100
+        appcode: c4c82c1a95774b15a63b022d0984aae8
+
   application:
     name: cocomall-third-party
 
