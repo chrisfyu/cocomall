@@ -5,9 +5,9 @@ spring:
         server-addr: 127.0.0.1:8848
     alicloud:
       sms:
-        host: https://dfsns.market.alicloudapi.com
-        path: /data/send_sms
-        template-id: CST_ptdie100
+        host: https://gyytz.market.alicloudapi.com
+        path: /sms/smsSend
+        template-id: 908e94ccf08b4476ba6c876d13f084ad
         appcode: c4c82c1a95774b15a63b022d0984aae8
 
   application:

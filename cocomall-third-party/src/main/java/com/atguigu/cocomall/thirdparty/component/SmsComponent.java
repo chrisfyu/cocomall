@@ -32,23 +32,26 @@ public class SmsComponent {
         Map<String, String> headers = new HashMap<String, String>();
         //最后在header中的格式(中间是英文空格)为Authorization:APPCODE 83359fd73fe94948385f570e3c139105
         headers.put("Authorization", "APPCODE " + appcode);
-        //根据API的要求，定义相对应的Content-Type
-        headers.put("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
         Map<String, String> querys = new HashMap<String, String>();
+        querys.put("mobile", phone);
+        querys.put("param", "**code**:" + code + ",**minute**:5");
+
+        querys.put("smsSignId", "2e65b1bb3d054466b82f0c9d125465e2");
+        querys.put("templateId", templateId);
         Map<String, String> bodys = new HashMap<String, String>();
-        bodys.put("content", "code:" + code);
-        bodys.put("template_id", templateId);  //注意，CST_ptdie100该模板ID仅为调试使用，调试结果为"status": "OK" ，即表示接口调用成功，然后联系客服报备自己的专属签名模板ID，以保证短信稳定下发
-        bodys.put("phone_number", phone);
+
 
         try {
-            HttpResponse response = HttpUtils.doPost(host, path, method, headers, querys, bodys);
-            HttpEntity entity = response.getEntity();
-            String result = EntityUtils.toString(entity,"UTF-8");
-            System.out.println(result);
+            System.out.println("Todo later");
+//            HttpResponse response = HttpUtils.doPost(host, path, method, headers, querys, bodys);
+//            System.out.println(response.toString());
             //获取response的body
-            //System.out.println(EntityUtils.toString(response.getEntity()));
+            // {"msg":"成功","smsid":"17790617148608583553278646","code":"0","balance":"15"}
+//            HttpEntity entity = response.getEntity();
+//            System.out.println(EntityUtils.toString(response.getEntity()));
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
 }
