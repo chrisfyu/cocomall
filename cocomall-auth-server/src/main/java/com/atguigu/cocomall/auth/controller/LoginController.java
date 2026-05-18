@@ -1,5 +1,7 @@
 package com.atguigu.cocomall.auth.controller;
 
+import com.alibaba.fastjson.TypeReference;
+import com.atguigu.cocomall.auth.feign.MemberFeignService;
 import com.atguigu.cocomall.auth.feign.ThirdPartyFeignService;
 import com.atguigu.cocomall.auth.vo.UserResgisterVo;
 import com.atguigu.common.constant.AuthServerConstant;
@@ -38,6 +40,9 @@ public class LoginController {
     @Autowired
     StringRedisTemplate redisTemplate;
 
+    @Autowired
+    MemberFeignService memberFeignService;
+
     @ResponseBody
     @PostMapping("/sms/sendcode")
     public R sendCode(@RequestParam("phone") String phone) {
@@ -50,12 +55,16 @@ public class LoginController {
             }
         }
 
-//        String code = UUID.randomUUID().toString().substring(0, 5);
-        String code = String.valueOf((int)((Math.random() * 9 + 1) * Math.pow(10,5))) + "_" + System.currentTimeMillis();
+////        String code = UUID.randomUUID().toString().substring(0, 5);
+        // TODO 修复短信验证码吗feign报错
+        String code = "123456";
+//        String code = String.valueOf((int)((Math.random() * 9 + 1) * Math.pow(10,5)));
 
-        redisTemplate.opsForValue().set(AuthServerConstant.SMS_CODE_CACHE_PREFIX + phone, code, 10, TimeUnit.MINUTES);
+        String substring = code + "_" + System.currentTimeMillis();
 
-        thirdPartyFeignService.sendCode(phone, code.split("_")[0]);
+        redisTemplate.opsForValue().set(AuthServerConstant.SMS_CODE_CACHE_PREFIX + phone, substring, 10, TimeUnit.MINUTES);
+
+        thirdPartyFeignService.sendCode(phone, code);
 
         return R.ok();
     }
@@ -65,15 +74,44 @@ public class LoginController {
         if (result.hasErrors()) {
 
             Map<String, String> errors = result.getFieldErrors().stream().collect(Collectors.toMap(FieldError::getField, FieldError::getDefaultMessage));
-
 //            model.addAttribute("errors", errors);
             redirectAttributes.addFlashAttribute("errors", errors);
             return "redirect:http://auth.cocomall.com/reg.html";
         }
 
         // 1、校验验证码
+        String code = vo.getCode();
 
-        // 注册成功回到登录页
-        return "redirect:/login.html";
+        String s = redisTemplate.opsForValue().get(AuthServerConstant.SMS_CODE_CACHE_PREFIX + vo.getPhone());
+        if (!StringUtils.isEmpty(s)) {
+            if (code.equals(s.split("_")[0])) {
+                // 删除验证码
+                redisTemplate.delete(AuthServerConstant.SMS_CODE_CACHE_PREFIX + vo.getPhone());
+
+                R r = memberFeignService.register(vo);
+                if (r.getCode() == 0) {
+                    // 注册成功回到登录页
+                    return "redirect:http://auth.cocomall.com/login.html";
+                } else {
+                    Map<String, String> errors = new HashMap<>();
+                    errors.put("msg", r.getData(new TypeReference<String>(){}));
+                    redirectAttributes.addFlashAttribute("errors", errors);
+                    return "redirect:http://auth.cocomall.com/reg.html";
+                }
+
+            } else {
+                Map<String, String> errors = new HashMap<>();
+                errors.put("code", "验证码错误");
+                redirectAttributes.addFlashAttribute("errors", errors);
+                return "redirect:http://auth.cocomall.com/reg.html";
+            }
+
+        } else {
+            Map<String, String> errors = new HashMap<>();
+            errors.put("code", "验证码错误");
+            redirectAttributes.addFlashAttribute("errors", errors);
+            // 校验出错，转发到注册页
+            return "redirect:http://auth.cocomall.com/reg.html";
+        }
     }
 }

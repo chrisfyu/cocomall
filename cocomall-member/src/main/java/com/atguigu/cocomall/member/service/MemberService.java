@@ -1,5 +1,8 @@
 package com.atguigu.cocomall.member.service;
 
+import com.atguigu.cocomall.member.exception.PhoneExistException;
+import com.atguigu.cocomall.member.exception.UsernameExistException;
+import com.atguigu.cocomall.member.vo.MemberRegisterVo;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.atguigu.common.utils.PageUtils;
 import com.atguigu.cocomall.member.entity.MemberEntity;
@@ -16,5 +19,11 @@ import java.util.Map;
 public interface MemberService extends IService<MemberEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
+
+    void register(MemberRegisterVo vo);
+
+    void checkPhoneUnique(String phone) throws PhoneExistException;
+
+    void checkUsernameUnique(String username) throws UsernameExistException;
 }
 
