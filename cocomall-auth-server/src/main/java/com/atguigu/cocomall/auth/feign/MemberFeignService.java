@@ -1,5 +1,6 @@
 package com.atguigu.cocomall.auth.feign;
 
+import com.atguigu.cocomall.auth.vo.UserLoginVo;
 import com.atguigu.cocomall.auth.vo.UserResgisterVo;
 import com.atguigu.common.utils.R;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -17,4 +18,7 @@ public interface MemberFeignService {
 
     @PostMapping("/member/member/register")
     R register(@RequestBody UserResgisterVo vo);
+
+    @PostMapping("/member/member/login")
+    R login(@RequestBody UserLoginVo vo);
 }

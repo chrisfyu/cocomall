@@ -3,6 +3,7 @@ package com.atguigu.cocomall.auth.controller;
 import com.alibaba.fastjson.TypeReference;
 import com.atguigu.cocomall.auth.feign.MemberFeignService;
 import com.atguigu.cocomall.auth.feign.ThirdPartyFeignService;
+import com.atguigu.cocomall.auth.vo.UserLoginVo;
 import com.atguigu.cocomall.auth.vo.UserResgisterVo;
 import com.atguigu.common.constant.AuthServerConstant;
 import com.atguigu.common.exception.BizCodeEnume;
@@ -94,7 +95,7 @@ public class LoginController {
                     return "redirect:http://auth.cocomall.com/login.html";
                 } else {
                     Map<String, String> errors = new HashMap<>();
-                    errors.put("msg", r.getData(new TypeReference<String>(){}));
+                    errors.put("msg", r.getData("msg", new TypeReference<String>(){}));
                     redirectAttributes.addFlashAttribute("errors", errors);
                     return "redirect:http://auth.cocomall.com/reg.html";
                 }
@@ -113,5 +114,21 @@ public class LoginController {
             // 校验出错，转发到注册页
             return "redirect:http://auth.cocomall.com/reg.html";
         }
+    }
+
+    @PostMapping("/login")
+    public String login(UserLoginVo vo, RedirectAttributes redirectAttributes) {
+
+        // 远程登录
+        R login = memberFeignService.login(vo);
+        if (login.getCode() == 0) {
+            return "redirect:http://cocomall.com";
+        } else {
+            Map<String, String> errors = new HashMap<>();
+            errors.put("msg", login.getData("msg", new TypeReference<String>(){}));
+            redirectAttributes.addFlashAttribute("errors", errors);
+            return "redirect:http://auth.cocomall.com/login.html";
+        }
+
     }
 }

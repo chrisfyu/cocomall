@@ -2,6 +2,7 @@ package com.atguigu.cocomall.member.service;
 
 import com.atguigu.cocomall.member.exception.PhoneExistException;
 import com.atguigu.cocomall.member.exception.UsernameExistException;
+import com.atguigu.cocomall.member.vo.MemberLoginVo;
 import com.atguigu.cocomall.member.vo.MemberRegisterVo;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.atguigu.common.utils.PageUtils;
@@ -25,5 +26,7 @@ public interface MemberService extends IService<MemberEntity> {
     void checkPhoneUnique(String phone) throws PhoneExistException;
 
     void checkUsernameUnique(String username) throws UsernameExistException;
+
+    MemberEntity login(MemberLoginVo vo);
 }
 

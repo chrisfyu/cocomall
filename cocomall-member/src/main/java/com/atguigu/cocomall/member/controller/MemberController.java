@@ -6,6 +6,7 @@ import java.util.Map;
 import com.atguigu.cocomall.member.exception.PhoneExistException;
 import com.atguigu.cocomall.member.exception.UsernameExistException;
 import com.atguigu.cocomall.member.feign.CouponFeignService;
+import com.atguigu.cocomall.member.vo.MemberLoginVo;
 import com.atguigu.cocomall.member.vo.MemberRegisterVo;
 import com.atguigu.common.exception.BizCodeEnume;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,18 @@ public class MemberController {
         R membercoupons = couponFeignService.membercoupons();
 
         return R.ok().put("member", memberEntity).put("coupons",membercoupons.get("coupons"));
+    }
+
+    @PostMapping("/login")
+    public R login(@RequestBody MemberLoginVo vo) {
+
+        MemberEntity entity = memberService.login(vo);
+        if (entity != null) {
+            return R.ok();
+        } else {
+            return R.error(BizCodeEnume.LOGINACCOUNT_PASSWORD_EXCEPTION.getCode()
+                    ,BizCodeEnume.LOGINACCOUNT_PASSWORD_EXCEPTION.getMsg());
+        }
     }
 
     @PostMapping("/register")
