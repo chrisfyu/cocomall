@@ -8,8 +8,10 @@ import com.atguigu.cocomall.member.exception.UsernameExistException;
 import com.atguigu.cocomall.member.feign.CouponFeignService;
 import com.atguigu.cocomall.member.vo.MemberLoginVo;
 import com.atguigu.cocomall.member.vo.MemberRegisterVo;
+import com.atguigu.cocomall.member.vo.SocialUser;
 import com.atguigu.common.exception.BizCodeEnume;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import com.atguigu.cocomall.member.entity.MemberEntity;
@@ -35,6 +37,20 @@ public class MemberController {
     @Autowired
     CouponFeignService couponFeignService;
 
+    @Transactional
+    @PostMapping("/oauth2/login")
+    public R oauthLogin(@RequestBody SocialUser socialUser) throws Exception {
+
+        MemberEntity entity = memberService.login(socialUser);
+        if (entity != null) {
+            // TODO 登陆成功处理
+            return R.ok().setData(entity);
+        } else {
+            return R.error(BizCodeEnume.LOGINACCOUNT_PASSWORD_EXCEPTION.getCode()
+                    ,BizCodeEnume.LOGINACCOUNT_PASSWORD_EXCEPTION.getMsg());
+        }
+    }
+
     @RequestMapping("/coupons")
     public R test(){
         MemberEntity memberEntity = new MemberEntity();
@@ -50,6 +66,7 @@ public class MemberController {
 
         MemberEntity entity = memberService.login(vo);
         if (entity != null) {
+            // TODO 登陆成功处理
             return R.ok();
         } else {
             return R.error(BizCodeEnume.LOGINACCOUNT_PASSWORD_EXCEPTION.getCode()

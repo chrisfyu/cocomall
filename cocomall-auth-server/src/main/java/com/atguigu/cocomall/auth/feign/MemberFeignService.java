@@ -1,5 +1,6 @@
 package com.atguigu.cocomall.auth.feign;
 
+import com.atguigu.cocomall.auth.vo.SocialUser;
 import com.atguigu.cocomall.auth.vo.UserLoginVo;
 import com.atguigu.cocomall.auth.vo.UserResgisterVo;
 import com.atguigu.common.utils.R;
@@ -21,4 +22,7 @@ public interface MemberFeignService {
 
     @PostMapping("/member/member/login")
     R login(@RequestBody UserLoginVo vo);
+
+    @PostMapping("/member/member/oauth2/login")
+    R oauthLogin(@RequestBody SocialUser socialUser) throws Exception;
 }
