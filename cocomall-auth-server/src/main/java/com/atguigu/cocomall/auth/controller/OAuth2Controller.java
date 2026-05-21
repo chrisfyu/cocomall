@@ -3,7 +3,8 @@ package com.atguigu.cocomall.auth.controller;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.atguigu.cocomall.auth.feign.MemberFeignService;
-import com.atguigu.cocomall.auth.vo.MemberRespVo;
+import com.atguigu.common.constant.AuthServerConstant;
+import com.atguigu.common.vo.MemberRespVo;
 import com.atguigu.cocomall.auth.vo.SocialUser;
 import com.atguigu.common.utils.HttpUtils;
 import com.atguigu.common.utils.R;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,16 +34,13 @@ public class OAuth2Controller {
     MemberFeignService memberFeignService;
 
     @GetMapping("/oauth2.0/weibo/success")
-    public String weibo(@RequestParam("code") String code) throws Exception {
+    public String weibo(@RequestParam("code") String code, HttpSession session) throws Exception {
 
-        // TODO 申请微博登录应用信息
         Map<String, String> map = new HashMap<>();
-        map.put("client_id", "2077705774");
-        // 2636917288
-        map.put("client_secret", "40af02bd1c7e435ba6a6e9cd3bf799fd");
-        // 6a263e9284c6c1a74a62eadacc11b6e2
+        map.put("client_id", "204426349");
+        map.put("client_secret", "410458c57bdb6c36eb36a831901d626f");
         map.put("grant_type", "authorization_code");
-        map.put("redirect_uri", "http://auth.gulimall.com/oauth2.0/weibo/success");
+        map.put("redirect_uri", "http://auth.cocomall.com/oauth2.0/weibo/success");
         map.put("code", code);
         // 1、根据code换取access_token
         HttpResponse response = HttpUtils.doPost("https://api.weibo.com", "/oauth2/access_token", "post", new HashMap<>(), new HashMap<>(), map);
@@ -58,6 +57,7 @@ public class OAuth2Controller {
                 MemberRespVo data = oauthLogin.getData("data", new TypeReference<MemberRespVo>() {
                 });
                 log.info("登陆成功：用户：{}", data.toString());
+                session.setAttribute(AuthServerConstant.LOGIN_USER, data);
 
                 return "redirect:http://cocomall.com";
             } else {
