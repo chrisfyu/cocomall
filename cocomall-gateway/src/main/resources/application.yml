@@ -67,4 +67,9 @@ spring:
         - id: cocomall_auth_route
           uri: lb://cocomall-auth-server
           predicates:
-            - Host=auth.cocomall.com,auth.gulimall.com
+            - Host=auth.cocomall.com
+
+        - id: cocomall_cart_route
+          uri: lb://cocomall-cart
+          predicates:
+            - Host=cart.cocomall.com
