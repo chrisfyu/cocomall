@@ -1,5 +1,9 @@
 package com.atguigu.cocomall.cart.service;
 
+import com.atguigu.cocomall.cart.vo.CartItem;
+
+import java.util.concurrent.ExecutionException;
+
 /**
  * @Description:
  * @Author: Fei Yu
@@ -7,4 +11,5 @@ package com.atguigu.cocomall.cart.service;
  */
 
 public interface CartService {
+    CartItem addToCart(Long skuId, Integer num) throws ExecutionException, InterruptedException;
 }
