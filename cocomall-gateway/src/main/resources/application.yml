@@ -73,3 +73,8 @@ spring:
           uri: lb://cocomall-cart
           predicates:
             - Host=cart.cocomall.com
+
+        - id: cocomall_order_route
+          uri: lb://cocomall-order
+          predicates:
+            - Host=order.cocomall.com
