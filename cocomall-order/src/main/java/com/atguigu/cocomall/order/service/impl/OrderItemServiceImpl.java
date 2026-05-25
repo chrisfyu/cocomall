@@ -1,6 +1,15 @@
 package com.atguigu.cocomall.order.service.impl;
 
+import com.atguigu.cocomall.order.entity.OrderEntity;
+import com.atguigu.cocomall.order.entity.OrderReturnReasonEntity;
+import com.rabbitmq.client.Channel;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageProperties;
+import org.springframework.amqp.rabbit.annotation.RabbitHandler;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
 import java.util.Map;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -13,6 +22,7 @@ import com.atguigu.cocomall.order.entity.OrderItemEntity;
 import com.atguigu.cocomall.order.service.OrderItemService;
 
 
+@RabbitListener(queues = {"hello-java-queue"})
 @Service("orderItemService")
 public class OrderItemServiceImpl extends ServiceImpl<OrderItemDao, OrderItemEntity> implements OrderItemService {
 
@@ -24,6 +34,40 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemDao, OrderItemEnt
         );
 
         return new PageUtils(page);
+    }
+
+    /**
+     * 监听消息队列
+     */
+    @RabbitHandler
+    public void receiveMessage(Message message,
+                               OrderReturnReasonEntity content,
+                               Channel channel) throws InterruptedException {
+//        System.out.println("接收到消息..." + message + "==>内容" + content);
+        byte[] body = message.getBody();
+        MessageProperties properties = message.getMessageProperties();
+//        Thread.sleep(3000);
+        System.out.println("消息处理完成==>" + content);
+        long deliveryTag = message.getMessageProperties().getDeliveryTag();
+        try {
+            if (deliveryTag % 2 == 0) {
+                channel.basicAck(deliveryTag, false);
+                System.out.println("有签收..." + deliveryTag);
+
+            } else {
+                channel.basicNack(deliveryTag, false, true);
+                System.out.println("没有签收..." + deliveryTag);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @RabbitHandler
+    public void receiveMessage2(OrderEntity content) {
+        System.out.println("消息处理完成==>" + content);
+
     }
 
 }
