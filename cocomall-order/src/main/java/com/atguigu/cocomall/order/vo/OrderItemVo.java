@@ -1,5 +1,7 @@
 package com.atguigu.cocomall.order.vo;
 
+import lombok.Data;
+
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -9,6 +11,7 @@ import java.util.List;
  * @CreateTime: 2026/5/25 8:14
  */
 
+@Data
 public class OrderItemVo {
 
     private Long skuId;
