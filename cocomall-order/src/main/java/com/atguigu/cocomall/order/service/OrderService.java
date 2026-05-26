@@ -1,6 +1,8 @@
 package com.atguigu.cocomall.order.service;
 
 import com.atguigu.cocomall.order.vo.OrderConfirmVo;
+import com.atguigu.cocomall.order.vo.OrderSubmitVo;
+import com.atguigu.cocomall.order.vo.SubmitOrderResponseVo;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.atguigu.common.utils.PageUtils;
 import com.atguigu.cocomall.order.entity.OrderEntity;
@@ -25,5 +27,11 @@ public interface OrderService extends IService<OrderEntity> {
      */
     OrderConfirmVo confirmOrder() throws ExecutionException, InterruptedException;
 
+    /**
+     * 下单
+     * @param vo
+     * @return
+     */
+    SubmitOrderResponseVo submitOrder(OrderSubmitVo vo);
 }
 
