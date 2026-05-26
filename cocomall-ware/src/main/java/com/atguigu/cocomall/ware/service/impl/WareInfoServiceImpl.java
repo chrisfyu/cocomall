@@ -1,6 +1,14 @@
 package com.atguigu.cocomall.ware.service.impl;
 
+import com.alibaba.fastjson.TypeReference;
+import com.atguigu.cocomall.ware.feign.MemberFeignService;
+import com.atguigu.cocomall.ware.vo.FareVo;
+import com.atguigu.cocomall.ware.vo.MemberAddressVo;
+import com.atguigu.common.utils.R;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
 import java.util.Map;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -16,6 +24,9 @@ import org.springframework.util.StringUtils;
 
 @Service("wareInfoService")
 public class WareInfoServiceImpl extends ServiceImpl<WareInfoDao, WareInfoEntity> implements WareInfoService {
+
+    @Autowired
+    MemberFeignService memberFeignService;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -35,6 +46,25 @@ public class WareInfoServiceImpl extends ServiceImpl<WareInfoDao, WareInfoEntity
         );
 
         return new PageUtils(page);
+    }
+
+    @Override
+    public FareVo getFare(Long addrId) {
+
+        FareVo fareVo = new FareVo();
+        R r = memberFeignService.addrInfo(addrId);
+        MemberAddressVo data = r.getData("memberReceiveAddress", new TypeReference<MemberAddressVo>() {
+        });
+
+        if (data != null) {
+            String phone = data.getPhone();
+            String substring = phone.substring(phone.length() - 2, phone.length());
+            BigDecimal fare = new BigDecimal(substring);
+            fareVo.setAddress(data);
+            fareVo.setFare(fare);
+            return fareVo;
+        }
+        return null;
     }
 
 }

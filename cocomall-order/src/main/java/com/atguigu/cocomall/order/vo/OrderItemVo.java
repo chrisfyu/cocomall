@@ -21,4 +21,6 @@ public class OrderItemVo {
     private BigDecimal price;
     private Integer count;
     private BigDecimal totalPrice;
+
+    private BigDecimal weight;
 }

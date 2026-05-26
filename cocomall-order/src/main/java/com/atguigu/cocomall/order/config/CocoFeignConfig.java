@@ -24,12 +24,15 @@ public class CocoFeignConfig {
             @Override
             public void apply(RequestTemplate template) {
                 ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-                System.out.println("ResquestInterceptor线程..." + Thread.currentThread().getId());
-                HttpServletRequest request = attributes.getRequest();
-                if (request != null) {
-                    // 同步请求头数据，Cookie
-                    String cookie = request.getHeader("Cookie");
-                    template.header("Cookie", cookie);
+
+                if (attributes != null) {
+                    System.out.println("ResquestInterceptor线程..." + Thread.currentThread().getId());
+                    HttpServletRequest request = attributes.getRequest();
+                    if (request != null) {
+                        // 同步请求头数据，Cookie
+                        String cookie = request.getHeader("Cookie");
+                        template.header("Cookie", cookie);
+                    }
                 }
             }
         };
