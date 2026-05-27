@@ -1,5 +1,6 @@
 package com.atguigu.cocomall.order.feign;
 
+import com.atguigu.cocomall.order.vo.WareSkuLockVo;
 import com.atguigu.common.utils.R;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,4 +25,7 @@ public interface WareFeignService {
 
     @GetMapping("/ware/wareinfo/fare")
     R getFare(@RequestParam("addrId") Long addrId);
+
+    @PostMapping("/ware/waresku/lock/order")
+    R orderLockStock(@RequestBody WareSkuLockVo vo);
 }
