@@ -16,6 +16,7 @@ import com.atguigu.common.exception.NoStockException;
 import com.atguigu.common.utils.R;
 import com.atguigu.common.vo.MemberRespVo;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
+import io.seata.spring.annotation.GlobalTransactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
@@ -130,6 +131,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         return confirmVo;
     }
 
+    @GlobalTransactional
     @Transactional
     @Override
     public SubmitOrderResponseVo submitOrder(OrderSubmitVo vo) {
@@ -180,6 +182,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
                 if (r.getCode() == 0) {
                     // 锁库存成功
                     response.setOrder(order.getOrder());
+
+                    // TODO 远程扣减积分
+
+                    // 库存服务本身也可以使用自动解锁模式，消息队列
                     return response;
                 } else {
                     // 锁定失败
