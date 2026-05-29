@@ -2,6 +2,7 @@ package com.atguigu.cocomall.ware.service;
 
 import com.atguigu.cocomall.ware.vo.SkuHasStockVo;
 import com.atguigu.cocomall.ware.vo.WareSkuLockVo;
+import com.atguigu.common.to.mq.OrderTo;
 import com.atguigu.common.to.mq.StockLockedTo;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.atguigu.common.utils.PageUtils;
@@ -28,5 +29,7 @@ public interface WareSkuService extends IService<WareSkuEntity> {
     Boolean orderLockStock(WareSkuLockVo vo);
 
     void unlockStock(StockLockedTo to);
+
+    void unlockStock(OrderTo to);
 }
 

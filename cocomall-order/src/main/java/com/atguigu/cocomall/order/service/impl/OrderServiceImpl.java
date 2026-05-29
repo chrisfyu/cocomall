@@ -4,6 +4,7 @@ import com.alibaba.fastjson.TypeReference;
 import com.atguigu.cocomall.order.constant.OrderConstant;
 import com.atguigu.cocomall.order.dao.OrderItemDao;
 import com.atguigu.cocomall.order.entity.OrderItemEntity;
+import com.atguigu.cocomall.order.enume.OrderStatusEnum;
 import com.atguigu.cocomall.order.feign.CartFeignService;
 import com.atguigu.cocomall.order.feign.MemberFeignService;
 import com.atguigu.cocomall.order.feign.ProductFeignService;
@@ -13,10 +14,14 @@ import com.atguigu.cocomall.order.service.OrderItemService;
 import com.atguigu.cocomall.order.to.OrderCreateTo;
 import com.atguigu.cocomall.order.vo.*;
 import com.atguigu.common.exception.NoStockException;
+import com.atguigu.common.to.mq.OrderTo;
 import com.atguigu.common.utils.R;
 import com.atguigu.common.vo.MemberRespVo;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import io.seata.spring.annotation.GlobalTransactional;
+import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
@@ -49,6 +54,9 @@ import org.springframework.web.context.request.RequestContextHolder;
 public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> implements OrderService {
 
     private ThreadLocal<OrderSubmitVo> confirmVoThreadLocal = new ThreadLocal<>();
+
+    @Autowired
+    RabbitTemplate rabbitTemplate;
 
     @Autowired
     OrderItemService orderItemService;
@@ -184,7 +192,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
                     response.setOrder(order.getOrder());
 
                     // TODO 远程扣减积分
-                    int i = 10/0;
+                    
+                    // TODO 订单创建成功发送消息给MQ
+                    rabbitTemplate.convertAndSend("order-event-exchange", "order.create.order", order.getOrder());
+
                     // 库存服务本身也可以使用自动解锁模式，消息队列
                     return response;
                 } else {
@@ -208,6 +219,34 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         return orderEntity;
     }
 
+    @Override
+    public void closeOrder(OrderEntity entity) {
+        // 查询当前这个订单的最新状态
+        OrderEntity orderEntity = this.getById(entity.getId());
+        if (orderEntity.getStatus() == OrderStatusEnum.CREATE_NEW.getCode()) {
+
+            OrderEntity update = new OrderEntity();
+            update.setId(entity.getId());
+            update.setStatus(OrderStatusEnum.CANCLED.getCode());
+            this.updateById(update);
+
+            // 发给MQ一个
+            OrderTo orderTo = new OrderTo();
+            BeanUtils.copyProperties(orderEntity, orderTo);
+
+            try {
+                //TODO 确保每个消息发送成功，给每个消息做好日志记录，(给数据库保存每一个详细信息)保存每个消息的详细信息
+                rabbitTemplate.convertAndSend("order-event-exchange", "order.release.other", orderTo);
+            } catch (AmqpException e) {
+                //TODO 定期扫描数据库，重新发送失败的消息
+            }
+        }
+    }
+
+    /**
+     * 保存订单数据
+     * @param order
+     */
     private void saveOrder(OrderCreateTo order) {
         OrderEntity orderEntity = order.getOrder();
         orderEntity.setCreateTime(new Date());
@@ -297,7 +336,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         entity.setReceiverRegion(fareResp.getAddress().getRegion());
 
         // 设置订单的相关状态信息
-
+        entity.setStatus(OrderStatusEnum.CREATE_NEW.getCode());
+        entity.setAutoConfirmDay(7);
+        entity.setConfirmStatus(0);
 
         return entity;
     }

@@ -12,6 +12,7 @@ import com.atguigu.cocomall.ware.feign.ProductFeignService;
 import com.atguigu.cocomall.ware.vo.OrderItemVo;
 import com.atguigu.cocomall.ware.vo.SkuHasStockVo;
 import com.atguigu.cocomall.ware.vo.WareSkuLockVo;
+import com.atguigu.common.to.mq.OrderTo;
 import com.atguigu.common.to.mq.StockDetailTo;
 import com.atguigu.common.to.mq.StockLockedTo;
 import com.atguigu.common.utils.R;
@@ -250,6 +251,31 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
             } else {
                 // 无需解锁
             }
+    }
+
+    /**
+     * 防止订单服务卡顿，导致订单状态消息一直改不了，库存优先到期，查订单状态新建，什么都不处理
+     * 导致卡顿的订单，永远都不能解锁库存
+     * 这是订单解锁后主动发的消息，来到这里说明订单已经解锁。
+     * @param to
+     */
+    @Transactional
+    @Override
+    public void unlockStock(OrderTo orderTo) {
+        String orderSn = orderTo.getOrderSn();
+        // 查一下最新库存的状态，防止重复解锁库存
+        WareOrderTaskEntity task = orderTaskService.getOrderTaskByOrderSn(orderSn);
+        Long id = task.getId();
+        // 按照工作单找到所有没解锁的库存进行解锁
+        List<WareOrderTaskDetailEntity> entities = orderTaskDetailService.list(
+                new QueryWrapper<WareOrderTaskDetailEntity>()
+                        .eq("task_id", id)
+                        .eq("lock_status", 1));
+
+        for (WareOrderTaskDetailEntity entity : entities) {
+            unLockStock(entity.getSkuId(), entity.getWareId(), entity.getSkuNum(), entity.getId());
+        }
+
     }
 
     private void unLockStock(Long skuId, Long wareId, Integer num, Long taskDetailId) {
