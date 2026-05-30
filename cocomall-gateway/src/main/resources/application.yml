@@ -78,3 +78,8 @@ spring:
           uri: lb://cocomall-order
           predicates:
             - Host=order.cocomall.com
+
+        - id: cocomall_member_route
+          uri: lb://cocomall-member
+          predicates:
+            - Host=member.cocomall.com
