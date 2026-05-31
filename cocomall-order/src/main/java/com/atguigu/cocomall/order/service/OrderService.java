@@ -1,9 +1,6 @@
 package com.atguigu.cocomall.order.service;
 
-import com.atguigu.cocomall.order.vo.OrderConfirmVo;
-import com.atguigu.cocomall.order.vo.OrderSubmitVo;
-import com.atguigu.cocomall.order.vo.PayVo;
-import com.atguigu.cocomall.order.vo.SubmitOrderResponseVo;
+import com.atguigu.cocomall.order.vo.*;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.atguigu.common.utils.PageUtils;
 import com.atguigu.cocomall.order.entity.OrderEntity;
@@ -45,5 +42,9 @@ public interface OrderService extends IService<OrderEntity> {
      * @return
      */
     PayVo getOrderPay(String orderSn);
+
+    PageUtils queryPageWithItem(Map<String, Object> params);
+
+    String handlePayResult(PayAsyncVo vo);
 }
 

@@ -4,6 +4,7 @@ import com.alibaba.fastjson.TypeReference;
 import com.atguigu.cocomall.order.constant.OrderConstant;
 import com.atguigu.cocomall.order.dao.OrderItemDao;
 import com.atguigu.cocomall.order.entity.OrderItemEntity;
+import com.atguigu.cocomall.order.entity.PaymentInfoEntity;
 import com.atguigu.cocomall.order.enume.OrderStatusEnum;
 import com.atguigu.cocomall.order.feign.CartFeignService;
 import com.atguigu.cocomall.order.feign.MemberFeignService;
@@ -11,6 +12,7 @@ import com.atguigu.cocomall.order.feign.ProductFeignService;
 import com.atguigu.cocomall.order.feign.WareFeignService;
 import com.atguigu.cocomall.order.interceptor.LoginUserInterceptor;
 import com.atguigu.cocomall.order.service.OrderItemService;
+import com.atguigu.cocomall.order.service.PaymentInfoService;
 import com.atguigu.cocomall.order.to.OrderCreateTo;
 import com.atguigu.cocomall.order.vo.*;
 import com.atguigu.common.exception.NoStockException;
@@ -57,6 +59,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
 
     @Autowired
     RabbitTemplate rabbitTemplate;
+
+    @Autowired
+    PaymentInfoService paymentInfoService;
 
     @Autowired
     OrderItemService orderItemService;
@@ -258,6 +263,49 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         payVo.setSubject(entity.getSkuName());
         payVo.setBody(entity.getSkuAttrsVals());
         return payVo;
+    }
+
+    @Override
+    public PageUtils queryPageWithItem(Map<String, Object> params) {
+        MemberRespVo memberRespVo = LoginUserInterceptor.loginUser.get();
+
+        IPage<OrderEntity> page = this.page(
+                new Query<OrderEntity>().getPage(params),
+                new QueryWrapper<OrderEntity>().eq("member_id", memberRespVo.getId()).orderByDesc("id")
+        );
+
+        List<OrderEntity> order_sn = page.getRecords().stream().map(order -> {
+            List<OrderItemEntity> itemEntities = orderItemService.list(new QueryWrapper<OrderItemEntity>().eq("order_sn", order.getOrderSn()));
+            order.setItemEntities(itemEntities);
+            return order;
+        }).collect(Collectors.toList());
+
+        page.setRecords(order_sn);
+        return new PageUtils(page);
+    }
+
+    /**
+     * 处理支付宝的支付结果
+     * @param vo
+     * @return
+     */
+    @Override
+    public String handlePayResult(PayAsyncVo vo) {
+        // 1、保存交易流水
+        PaymentInfoEntity infoEntity = new PaymentInfoEntity();
+        infoEntity.setAlipayTradeNo(vo.getTrade_no());
+        infoEntity.setOrderSn(vo.getOut_trade_no());
+        infoEntity.setPaymentStatus(vo.getTrade_status());
+        infoEntity.setCallbackTime(vo.getNotify_time());
+        
+        paymentInfoService.save(infoEntity);
+        
+        // 2、修改订单的状态信息
+        if (vo.getTrade_status().equals("TRADE_SUCCESS") || vo.getTrade_status().equals("TRADE_FINISHED")) {
+            String outTradeNo = vo.getOut_trade_no();
+            this.baseMapper.updateOrderStatus(outTradeNo, OrderStatusEnum.PAYED.getCode());
+        }
+        return "success";
     }
 
     /**
