@@ -18,6 +18,12 @@
         <module>renren-fast</module>
         <module>renren-generator</module>
         <module>cocomall-common</module>
+        <module>cocomall-gateway</module>
+        <module>cocomall-third-party</module>
+        <module>cocomall-search</module>
+        <module>cocomall-auth-server</module>
+        <module>cocomall-cart</module>
+        <module>cocomall-seckill</module>
     </modules>
 
 </project>
