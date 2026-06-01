@@ -1,7 +1,7 @@
-package com.atguigu.cocomall.lseckill.controller;
+package com.atguigu.cocomall.seckill.controller;
 
-import com.atguigu.cocomall.lseckill.service.SeckillService;
-import com.atguigu.cocomall.lseckill.to.SeckillSkuRedisTo;
+import com.atguigu.cocomall.seckill.service.SeckillService;
+import com.atguigu.cocomall.seckill.to.SeckillSkuRedisTo;
 import com.atguigu.common.utils.R;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;

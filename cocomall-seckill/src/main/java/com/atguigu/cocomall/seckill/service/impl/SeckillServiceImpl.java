@@ -1,13 +1,13 @@
-package com.atguigu.cocomall.lseckill.service.impl;
+package com.atguigu.cocomall.seckill.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
-import com.atguigu.cocomall.lseckill.feign.CouponFeignService;
-import com.atguigu.cocomall.lseckill.feign.ProductFeignService;
-import com.atguigu.cocomall.lseckill.service.SeckillService;
-import com.atguigu.cocomall.lseckill.to.SeckillSkuRedisTo;
-import com.atguigu.cocomall.lseckill.vo.SeckillSessionsWithSkus;
-import com.atguigu.cocomall.lseckill.vo.SkuInfoVo;
+import com.atguigu.cocomall.seckill.feign.CouponFeignService;
+import com.atguigu.cocomall.seckill.feign.ProductFeignService;
+import com.atguigu.cocomall.seckill.service.SeckillService;
+import com.atguigu.cocomall.seckill.to.SeckillSkuRedisTo;
+import com.atguigu.cocomall.seckill.vo.SeckillSessionsWithSkus;
+import com.atguigu.cocomall.seckill.vo.SkuInfoVo;
 import com.atguigu.common.utils.R;
 import org.redisson.api.RSemaphore;
 import org.redisson.api.RedissonClient;

@@ -1,6 +1,6 @@
-package com.atguigu.cocomall.lseckill.scheduled;
+package com.atguigu.cocomall.seckill.scheduled;
 
-import com.atguigu.cocomall.lseckill.service.SeckillService;
+import com.atguigu.cocomall.seckill.service.SeckillService;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;

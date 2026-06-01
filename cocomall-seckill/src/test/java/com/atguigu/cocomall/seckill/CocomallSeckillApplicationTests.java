@@ -1,4 +1,4 @@
-package com.atguigu.cocomall.lseckill;
+package com.atguigu.cocomall.seckill;
 
 import org.junit.Test;
 import org.springframework.boot.test.context.SpringBootTest;

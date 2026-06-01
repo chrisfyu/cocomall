@@ -1,6 +1,6 @@
-package com.atguigu.cocomall.lseckill.service;
+package com.atguigu.cocomall.seckill.service;
 
-import com.atguigu.cocomall.lseckill.to.SeckillSkuRedisTo;
+import com.atguigu.cocomall.seckill.to.SeckillSkuRedisTo;
 
 import java.util.List;
 

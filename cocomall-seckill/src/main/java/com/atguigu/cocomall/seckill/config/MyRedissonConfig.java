@@ -1,4 +1,4 @@
-package com.atguigu.cocomall.lseckill.config;
+package com.atguigu.cocomall.seckill.config;
 
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;

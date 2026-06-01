@@ -1,6 +1,6 @@
-package com.atguigu.cocomall.lseckill.to;
+package com.atguigu.cocomall.seckill.to;
 
-import com.atguigu.cocomall.lseckill.vo.SkuInfoVo;
+import com.atguigu.cocomall.seckill.vo.SkuInfoVo;
 import lombok.Data;
 
 import java.math.BigDecimal;

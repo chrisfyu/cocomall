@@ -1,4 +1,4 @@
-package com.atguigu.cocomall.lseckill.config;
+package com.atguigu.cocomall.seckill.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;

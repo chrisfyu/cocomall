@@ -1,4 +1,4 @@
-package com.atguigu.cocomall.lseckill.feign;
+package com.atguigu.cocomall.seckill.feign;
 
 import com.atguigu.common.utils.R;
 import org.springframework.cloud.openfeign.FeignClient;

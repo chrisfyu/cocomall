@@ -1,4 +1,4 @@
-package com.atguigu.cocomall.lseckill.vo;
+package com.atguigu.cocomall.seckill.vo;
 
 import lombok.Data;
 
