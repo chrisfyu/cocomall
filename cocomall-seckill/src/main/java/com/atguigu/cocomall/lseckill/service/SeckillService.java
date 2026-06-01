@@ -1,5 +1,9 @@
 package com.atguigu.cocomall.lseckill.service;
 
+import com.atguigu.cocomall.lseckill.to.SeckillSkuRedisTo;
+
+import java.util.List;
+
 /**
  * @Description:
  * @Author: Fei Yu
@@ -8,4 +12,6 @@ package com.atguigu.cocomall.lseckill.service;
 
 public interface SeckillService {
     void uploadSeckillSkuLatest3Days();
+
+    List<SeckillSkuRedisTo> getCurrentSeckillSkus();
 }

@@ -90,3 +90,8 @@ spring:
           uri: lb://cocomall-member
           predicates:
             - Host=member.cocomall.com
+
+        - id: cocomall_seckill_route
+          uri: lb://cocomall-seckill
+          predicates:
+            - Host=seckill.cocomall.com

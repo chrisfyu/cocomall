@@ -1,0 +1,33 @@
+package com.atguigu.cocomall.lseckill.controller;
+
+import com.atguigu.cocomall.lseckill.service.SeckillService;
+import com.atguigu.cocomall.lseckill.to.SeckillSkuRedisTo;
+import com.atguigu.common.utils.R;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+/**
+ * @Description:
+ * @Author: Fei Yu
+ * @CreateTime: 2026/5/31 22:03
+ */
+
+@RestController
+public class SeckillController {
+
+    @Autowired
+    SeckillService seckillService;
+
+    /**
+     * 返回当前时间可以参与的秒杀商品信息
+     * @return
+     */
+    @GetMapping("/currentSeckillSkus")
+    public R getCurrentSeckillSkus() {
+        List<SeckillSkuRedisTo> vos = seckillService.getCurrentSeckillSkus();
+        return R.ok().setData(vos);
+    }
+}
