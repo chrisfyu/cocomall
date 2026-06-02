@@ -1,6 +1,7 @@
 package com.atguigu.cocomall.order.service;
 
 import com.atguigu.cocomall.order.vo.*;
+import com.atguigu.common.to.mq.SeckillOrderTo;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.atguigu.common.utils.PageUtils;
 import com.atguigu.cocomall.order.entity.OrderEntity;
@@ -46,5 +47,7 @@ public interface OrderService extends IService<OrderEntity> {
     PageUtils queryPageWithItem(Map<String, Object> params);
 
     String handlePayResult(PayAsyncVo vo);
+
+    void createSeckillOrder(SeckillOrderTo seckillOrder);
 }
 

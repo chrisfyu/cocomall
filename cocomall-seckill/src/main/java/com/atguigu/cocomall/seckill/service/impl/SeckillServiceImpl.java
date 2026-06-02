@@ -4,20 +4,28 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.atguigu.cocomall.seckill.feign.CouponFeignService;
 import com.atguigu.cocomall.seckill.feign.ProductFeignService;
+import com.atguigu.cocomall.seckill.interceptor.LoginUserInterceptor;
 import com.atguigu.cocomall.seckill.service.SeckillService;
 import com.atguigu.cocomall.seckill.to.SeckillSkuRedisTo;
 import com.atguigu.cocomall.seckill.vo.SeckillSessionsWithSkus;
 import com.atguigu.cocomall.seckill.vo.SkuInfoVo;
+import com.atguigu.common.to.mq.SeckillOrderTo;
 import com.atguigu.common.utils.R;
+import com.atguigu.common.vo.MemberRespVo;
+import com.baomidou.mybatisplus.core.toolkit.IdWorker;
+import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RSemaphore;
 import org.redisson.api.RedissonClient;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -27,6 +35,7 @@ import java.util.stream.Collectors;
  * @CreateTime: 2026/5/31 11:22
  */
 
+@Slf4j
 @Service
 public class SeckillServiceImpl implements SeckillService {
 
@@ -38,6 +47,9 @@ public class SeckillServiceImpl implements SeckillService {
 
     @Autowired
     StringRedisTemplate redisTemplate;
+
+    @Autowired
+    RabbitTemplate rabbitTemplate;
 
     @Autowired
     RedissonClient redissonClient;
@@ -113,6 +125,76 @@ public class SeckillServiceImpl implements SeckillService {
                     }
                     return skuRedisTo;
                 }
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    public String kill(String killId, String key, Integer num) {
+
+        long s1 = System.currentTimeMillis();
+        MemberRespVo respVo = LoginUserInterceptor.loginUser.get();
+        BoundHashOperations<String, String, String> hashOps = redisTemplate.boundHashOps(SKUKILL_CACHE_PREFIX);
+
+        String json = hashOps.get(killId);
+        if (StringUtils.isEmpty(json)) {
+            return null;
+        } else {
+            SeckillSkuRedisTo redis = JSON.parseObject(json, SeckillSkuRedisTo.class);
+            // 校验合法性
+            Long startTime = redis.getStartTime();
+            Long endTime = redis.getEndTime();
+            long time = new Date().getTime();
+
+            long ttl = endTime - time;
+            // 1、校验时间的合法性
+            if (time >= startTime && time <= endTime) {
+                // 2、校验随机码和商品id
+                String randomCode = redis.getRandomCode();
+                String skuId = redis.getPromotionSessionId() + "_" + redis.getSkuId();
+                if (randomCode.equals(key) && killId.equals(skuId)) {
+                    // 3、验证购物数量是否合理
+                    if (num <= redis.getSeckillLimit().intValue()) {
+                        // 4、验证这个人是否已经购买过。幂等性。
+                        String redisKey = respVo.getId() + "_" + skuId;
+                        // 自动过期
+                        Boolean aBoolean = redisTemplate.opsForValue().setIfAbsent(redisKey, num.toString(), ttl, TimeUnit.MILLISECONDS);
+                        if (aBoolean) {
+                            // 占位成功说明从来没有买过
+                            RSemaphore semaphore = redissonClient.getSemaphore(SKU_STOCK_SEMAPHORE + randomCode);
+
+                            boolean b = semaphore.tryAcquire(num);
+                            if (b) {
+                                // 秒杀成功；
+                                // 快速下单。发送MQ消息。
+                                String timeId = IdWorker.getTimeId();
+                                SeckillOrderTo orderTo = new SeckillOrderTo();
+                                orderTo.setOrderSn(timeId);
+                                orderTo.setMemberId(respVo.getId());
+                                orderTo.setNum(num);
+                                orderTo.setPromotionSessionId(redis.getPromotionSessionId());
+                                orderTo.setSkuId(redis.getSkuId());
+                                orderTo.setSeckillPrice(redis.getSeckillPrice());
+                                rabbitTemplate.convertAndSend("order-event-exchange", "order.seckill.order", orderTo);
+
+                                long s2 = System.currentTimeMillis();
+                                log.info("耗时...{}", (s2 - s1));
+                                return timeId;
+                            }
+                            return null;
+                        } else {
+                            // 说明已经买过了
+                            return null;
+                        }
+                    }
+
+                } else {
+                    return null;
+                }
+            } else {
+                return null;
             }
         }
 
