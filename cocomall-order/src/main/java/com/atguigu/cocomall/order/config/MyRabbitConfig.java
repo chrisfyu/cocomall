@@ -1,6 +1,7 @@
 package com.atguigu.cocomall.order.config;
 
 import org.springframework.amqp.core.Message;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
@@ -8,6 +9,7 @@ import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
 import javax.annotation.PostConstruct;
 
@@ -20,8 +22,18 @@ import javax.annotation.PostConstruct;
 @Configuration
 public class MyRabbitConfig {
 
-    @Autowired
+//    @Autowired
     RabbitTemplate rabbitTemplate;
+
+    @Primary
+    @Bean
+    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
+        RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
+        this.rabbitTemplate = rabbitTemplate;
+        rabbitTemplate.setMessageConverter(messageConverter());
+        initRabbitTemplate();
+        return rabbitTemplate;
+    }
 
     @Bean
     public MessageConverter messageConverter() {
@@ -41,7 +53,7 @@ public class MyRabbitConfig {
      * 3、消费端确认(保证每个消息都被正确消费，此时才可以broker删除这个消息)
      *
      */
-    @PostConstruct
+//    @PostConstruct
     public void initRabbitTemplate() {
 
         /**
