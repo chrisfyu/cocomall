@@ -35,7 +35,7 @@ public class SeckillSkuScheduled {
 
     private final String upload_lock = "seckill:upload:lock";
 
-    @Scheduled(cron = "*/5 * * * * ?")
+    @Scheduled(cron = "0 * * * * ?")
     public void uploadSeckillSkuLatest3Days() {
 
         //1、重复上架无需处理

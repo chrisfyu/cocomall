@@ -30,6 +30,7 @@ import org.springframework.session.data.redis.config.annotation.web.http.EnableR
  *          } catch(Exception e) {}
  *
  *  2）、基于注解
+ *  at SentinelResource(value = "getCurrentSeckillSkusResource", blockHandler = "blockHandler")
  *
  */
 
