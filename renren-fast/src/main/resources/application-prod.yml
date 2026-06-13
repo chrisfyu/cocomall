@@ -3,8 +3,8 @@ spring:
         type: com.alibaba.druid.pool.DruidDataSource
         druid:
             driver-class-name: com.mysql.cj.jdbc.Driver
-            url: jdbc:mysql://localhost:3306/renren_fast?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
-            username: renren
+            url: jdbc:mysql://mysql-master.cocomall:3306/renren_fast?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+            username: root
             password: 123456
             initial-size: 10
             max-active: 100
@@ -33,7 +33,12 @@ spring:
                     config:
                         multi-statement-allow: true
 
-
+    application:
+        name: renren-fast
+    cloud:
+        nacos:
+            discovery:
+                server-addr: nacos-service.cocomall:8848
 ##多数据源的配置
 #dynamic:
 #  datasource:
@@ -51,7 +56,7 @@ spring:
     redis:
         open: false  # 是否开启redis缓存  true开启   false关闭
         database: 0
-        host: localhost
+        host: redis.cocomall
         port: 6379
         password:    # 密码（默认为空）
         timeout: 6000ms  # 连接超时时长（毫秒）

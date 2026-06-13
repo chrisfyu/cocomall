@@ -1,0 +1,97 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+#        - id: test_route
+#          uri: https://www.baidu.com
+#          predicates:
+#            - Query=url,baidu
+#
+#        - id: qq_route
+#          uri: https://www.qq.com
+#          predicates:
+#            - Query=url,qq
+
+        - id: product_route
+          uri: lb://cocomall-product
+          predicates:
+            - Path=/api/product/**
+          filters:
+            - RewritePath=/api/(?<segment>.*),/$\{segment}
+
+        - id: coupon_route
+          uri: lb://cocomall-coupon
+          predicates:
+            - Path=/api/coupon/**
+          filters:
+            - RewritePath=/api/(?<segment>.*),/$\{segment}
+
+        - id: third_party_route
+          uri: lb://cocomall-third-party
+          predicates:
+            - Path=/api/thirdparty/**
+          filters:
+            - RewritePath=/api/thirdparty/(?<segment>.*),/$\{segment}
+
+        - id: member_route
+          uri: lb://cocomall-member
+          predicates:
+            - Path=/api/member/**
+          filters:
+            - RewritePath=/api/(?<segment>.*),/$\{segment}
+
+        - id: ware_route
+          uri: lb://cocomall-ware
+          predicates:
+            - Path=/api/ware/**
+          filters:
+            - RewritePath=/api/(?<segment>.*),/$\{segment}
+
+        - id: order_route
+          uri: lb://cocomall-order
+          predicates:
+            - Path=/api/order/**
+          filters:
+            - RewritePath=/api/(?<segment>/?.*),/$\{segment}
+
+        - id: admin_route
+          uri: lb://renren-fast
+          predicates:
+            - Path=/api/**
+          filters:
+            - RewritePath=/api/(?<segment>.*),/renren-fast/$\{segment}
+
+        - id: cocomall_host_route
+          uri: lb://cocomall-product
+          predicates:
+            - Host=cocomall.com,item.cocomall.com
+
+        - id: cocomall_search_route
+          uri: lb://cocomall-search
+          predicates:
+            - Host=search.cocomall.com
+
+        - id: cocomall_auth_route
+          uri: lb://cocomall-auth-server
+          predicates:
+            - Host=auth.cocomall.com
+
+        - id: cocomall_cart_route
+          uri: lb://cocomall-cart
+          predicates:
+            - Host=cart.cocomall.com
+
+        - id: cocomall_order_route
+          uri: lb://cocomall-order
+          predicates:
+            - Host=order.cocomall.com
+
+        - id: cocomall_member_route
+          uri: lb://cocomall-member
+          predicates:
+            - Host=member.cocomall.com
+
+        - id: cocomall_seckill_route
+          uri: lb://cocomall-seckill
+          predicates:
+            - Host=seckill.cocomall.com
