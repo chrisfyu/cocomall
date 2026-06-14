@@ -10,7 +10,7 @@ pipeline {
     GITHUB_CREDENTIAL_ID = 'github-id'
     KUBECONFIG_CREDENTIAL_ID = 'demo-kubeconfig'
     REGISTRY = 'docker.io'
-    DOCKERHUB_NAMESPACE = 'chrisfyu1'
+    DOCKERHUB_NAMESPACE = 'chrisfyu2'
     GITHUB_ACCOUNT = 'chrisfyu@hotmail.com'
     SONAR_CREDENTIAL_ID = 'sonar-qube'
     BRANCH_NAME = 'dev'
@@ -75,7 +75,7 @@ pipeline {
       }
       steps {
         input(id: 'deploy-to-dev-$PROJECT_NAME', message: 'Deploy $PROJECT_NAME to k8s clusters?')
-        kubernetesDeploy(configs: '$PROJECT_NAME/deploy/**', enableConfigSubstitution: true, kubeconfigId: "$KUBECONFIG_CREDENTIAL_ID")
+        kubernetesDeploy(configs: "$PROJECT_NAME/deploy/**", enableConfigSubstitution: true, kubeconfigId: "$KUBECONFIG_CREDENTIAL_ID")
       }
     }
 
