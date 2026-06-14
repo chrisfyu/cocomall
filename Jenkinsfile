@@ -74,7 +74,7 @@ pipeline {
         branch 'dev'
       }
       steps {
-        input(id: 'deploy-to-dev-$PROJECT_NAME', message: 'Deploy $PROJECT_NAME to k8s clusters?')
+        input(id: "deploy-to-dev-$PROJECT_NAME", message: "Deploy $PROJECT_NAME to k8s clusters?")
         kubernetesDeploy(configs: "$PROJECT_NAME/deploy/**", enableConfigSubstitution: true, kubeconfigId: "$KUBECONFIG_CREDENTIAL_ID")
       }
     }
