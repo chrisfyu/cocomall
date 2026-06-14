@@ -88,7 +88,7 @@ pipeline {
       steps {
         input(id: 'release-image-with-tag', message: 'release image with tag?')
         container ('maven') {
-          withCredentials([usernamePassword(credentialsId: "$GITHUB_CREDENTIAL_ID", passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+          withCredentials([usernamePassword(credentialsId: "$GITHUB_CREDENTIAL_ID", passwordVariable: "GIT_PASSWORD", usernameVariable: "GIT_USERNAME")]) {
             sh 'git config --global user.email "chrisfyu@hotmail.com" '
             sh 'git config --global user.name "yufei" '
             sh 'git tag -a $PROJECT_VERSION -m "$PROJECT_VERSION" '
